@@ -1,0 +1,20 @@
+{
+	"name": "pplx",
+	"version": "0.2.0",
+	"private": true,
+	"description": "Perplexity CLI and SDK monorepo",
+	"workspaces": ["packages/*"],
+	"scripts": {
+		"install:dev": "bun install && bun --cwd=packages/cli link",
+		"check": "biome check . && tsc -p tsconfig.json --noEmit",
+		"lint": "biome lint .",
+		"fmt": "biome format --write .",
+		"fix": "biome check --write --unsafe .",
+		"cli": "bun --cwd=packages/cli run dev"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.0.0",
+		"@types/bun": "latest",
+		"typescript": "^5.5.4"
+	}
+}

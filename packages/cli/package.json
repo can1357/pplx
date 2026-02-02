@@ -1,0 +1,21 @@
+{
+	"name": "@pplx/cli",
+	"version": "0.2.0",
+	"description": "Perplexity terminal client",
+	"type": "module",
+	"bin": {
+		"pplx": "src/index.ts"
+	},
+	"scripts": {
+		"dev": "bun run src/index.ts",
+		"build": "bun build src/index.ts --outfile dist/pplx.js --target node --format esm --banner '#!/usr/bin/env node'",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@pplx/api": "workspace:*",
+		"chalk": "^5.4.1",
+		"cli-spinners": "^2.9.2",
+		"string-width": "^7.2.0",
+		"wrap-ansi": "^8.1.0"
+	}
+}
