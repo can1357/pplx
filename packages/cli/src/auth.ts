@@ -6,6 +6,7 @@ import { join } from "node:path";
 const CONFIG_DIR = join(homedir(), ".config", "pplx");
 const COOKIES_FILE = join(CONFIG_DIR, "cookies");
 const PERPLEXITY_APP_COOKIES = join(homedir(), ".config", "Perplexity", "Cookies");
+const PPLX_MACOS_BUNDLE_ID = "ai.perplexity.mac";
 
 /** Load cookies from the environment or local config file. */
 export function resolveCookies(): string | null {
@@ -23,6 +24,10 @@ export function resolveCookies(): string | null {
 		return null;
 	}
 
+	const macToken = extractTokenFromUserDefaults();
+	if (macToken) {
+		return macToken;
+	}
 	return null;
 }
 
@@ -47,6 +52,33 @@ function hasSqlite3(): boolean {
 		return true;
 	} catch {
 		return false;
+	}
+}
+
+/**
+ * Read the auth token from the macOS Perplexity app's UserDefaults.
+ *
+ * The macOS app stores its session token in UserDefaults (not Keychain),
+ * readable via `defaults read ai.perplexity.mac authToken`.
+ */
+function extractTokenFromUserDefaults(): string | null {
+	if (process.platform !== "darwin") {
+		return null;
+	}
+
+	try {
+		const token = execSync(`defaults read ${PPLX_MACOS_BUNDLE_ID} authToken`, {
+			encoding: "utf-8",
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+
+		if (!token) {
+			return null;
+		}
+
+		return `__Secure-next-auth.session-token=${token}`;
+	} catch {
+		return null;
 	}
 }
 
@@ -85,17 +117,21 @@ function extractFromDesktopApp(): string | null {
  * Extract cookies from the Perplexity desktop app and store them locally.
  */
 export async function login(): Promise<string> {
+	const macToken = extractTokenFromUserDefaults();
+	if (macToken) {
+		storeCookies(macToken);
+		console.log("✓ Extracted session token from macOS Perplexity app");
+		return macToken;
+	}
 	const appCookies = extractFromDesktopApp();
 	if (appCookies) {
 		storeCookies(appCookies);
 		console.log("✓ Extracted cookies from the Perplexity desktop app");
 		return appCookies;
 	}
-
 	if (!existsSync(PERPLEXITY_APP_COOKIES)) {
 		throw new Error("Perplexity desktop app not found. Install it from https://www.perplexity.ai/download");
 	}
-
 	throw new Error("No valid session found. Please log in to the desktop app.");
 }
 
