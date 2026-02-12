@@ -91,7 +91,7 @@ function renderHelp(): string {
 		{ left: "pplx <query>", right: "Ask a question" },
 		{ left: "pplx chat", right: "Interactive thread mode" },
 		{ left: "pplx models", right: "List available models" },
-		{ left: "pplx --login", right: "Extract cookies from desktop app" },
+		{ left: "pplx --login", right: "Login via desktop token or email OTP" },
 		{ left: "pplx --logout", right: "Clear stored session" },
 	].map(entry => `${pad(theme.query(entry.left), columnWidth)} ${theme.muted(entry.right)}`);
 
